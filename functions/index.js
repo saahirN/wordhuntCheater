@@ -7,8 +7,21 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-const {onRequest} = require("firebase-functions/v2/https");
-const logger = require("firebase-functions/logger");
+const admin = require('firebase-admin');
+const {onObjectFinalized} = require("firebase-functions/v2/storage");
+const vision = require("@google-cloud/vision");
+
+admin.initializeApp(); 
+const client = new vision.ImageAnnotatorClient();
+
+exports.processScreenshot = onObjectFinalized(async event => {
+    const fileBucket = event.data.bucket;
+    const fileName = event.data.name;
+
+    const [result] = await client.textDetection(`gs://${fileBucket}/${fileName}`);
+    const detections = result.textAnnotations;
+    return admin.firestore().collections("images").doc(fileName).set(detections); 
+})
 
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
