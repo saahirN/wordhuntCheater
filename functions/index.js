@@ -11,10 +11,10 @@ const admin = require('firebase-admin');
 const {onObjectFinalized} = require("firebase-functions/v2/storage");
 const vision = require("@google-cloud/vision");
 
-admin.initializeApp(); 
 const client = new vision.ImageAnnotatorClient();
 
 exports.processScreenshot = onObjectFinalized(async event => {
+    admin.initializeApp(); 
     const fileBucket = event.data.bucket;
     const fileName = event.data.name;
 
